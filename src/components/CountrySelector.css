@@ -7,6 +7,7 @@
 }
 .option:hover{
     cursor: pointer;
+    background-color: #e0f0ff;
 }
 /* Drapeaux */
 .option img,
