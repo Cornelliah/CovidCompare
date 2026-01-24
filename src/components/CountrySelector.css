@@ -1,0 +1,81 @@
+/* Option dans la liste */
+.option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+}
+
+/* Drapeaux */
+.option img,
+.single-value img {
+    width: 22px;
+    height: 16px;
+    border-radius: 3px;
+    flex-shrink: 0;
+}
+
+/* Valeur sélectionnée */
+.single-value {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Container principal */
+.react-select__control {
+    min-height: 54px;
+    border-radius: 14px;
+    padding-left: 6px;
+    border: 2px solid #c7ddff;
+    background-color: #f8fbff;
+    box-shadow: 0 6px 18px rgba(59, 130, 246, 0.15);
+    cursor: pointer;
+}
+
+/* Focus */
+.react-select__control--is-focused {
+    border-color: #3b82f6;
+    box-shadow: 0 8px 22px rgba(59, 130, 246, 0.35);
+}
+
+/* Suppression outline par défaut */
+.react-select__control--is-focused,
+.react-select__control--menu-is-open {
+    outline: none;
+}
+
+/* Texte */
+.react-select__value-container {
+    padding: 0 12px;
+    font-size: 16px;
+}
+
+/* Placeholder */
+.react-select__placeholder {
+    color: #6b7280;
+}
+
+/* Menu dropdown */
+.react-select__menu {
+    border-radius: 12px;
+    overflow: hidden;
+    margin-top: 8px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+/* Option hover */
+.react-select__option--is-focused {
+    background-color: #eef4ff;
+}
+
+/* Option sélectionnée */
+.react-select__option--is-selected {
+    background-color: #3b82f6;
+    color: white;
+}
+
+/* Flèche */
+.react-select__indicator-separator {
+    display: none;
+}
