@@ -1,64 +1,54 @@
 import React from "react";
+import Select from "react-select";
+import "./CountrySelector.css";
 
 const CountrySelector = ({ countries, selectedCountries, setSelectedCountries }) => {
 
-    const handleSelect = (e) => {
-        const value = e.target.value;
-
-        if (
-            value &&
-            !selectedCountries.includes(value) &&
-            selectedCountries.length < 2
-        ) {
-            setSelectedCountries([...selectedCountries, value]);
-        }
+    const handleChange = (index, selectedOption) => {
+        const newSelected = [...selectedCountries];
+        newSelected[index] = selectedOption?.value || null;
+        setSelectedCountries(newSelected);
     };
 
-    const removeCountry = (value) => {
-        setSelectedCountries(selectedCountries.filter(c => c !== value));
-    };
+    const customOption = ({ innerProps, data }) => (
+        <div {...innerProps} className="option">
+            <img src={data.flag} alt={data.label} />
+            <span>{data.label}</span>
+        </div>
+    );
 
-    // Filtrer les pays déjà sélectionnés
-    const availableCountries = countries.filter(
-        c => !selectedCountries.includes(c.value)
+    const customSingleValue = ({ data }) => (
+        <div className="single-value">
+            <img src={data.flag} alt={data.label} />
+            <span>{data.label}</span>
+        </div>
     );
 
     return (
-        <div>
-            <h3>Sélectionner 2 pays</h3>
+        <div className="country-selector-container">
+            {[0, 1].map(index => (
+                <div key={index} className="country-block">
+                    <label className="country-label">
+                        Pays {index + 1}
+                    </label>
 
-            <select onChange={handleSelect} value="">
-                <option value="">-- Choisir un pays --</option>
-                {availableCountries.map(country => (
-                    <option key={country.value} value={country.value}>
-                        {country.label}
-                    </option>
-                ))}
-            </select>
-
-            <div style={{ marginTop: "10px" }}>
-                <h4>Pays sélectionnés :</h4>
-
-                {selectedCountries.map(value => {
-                    const country = countries.find(c => c.value === value);
-                    return (
-                        <div key={value}>
-                            {country?.flag && (
-                                <img
-                                    src={country.flag}
-                                    alt={country.label}
-                                    width="20"
-                                    style={{ marginRight: "8px" }}
-                                />
-                            )}
-                            {country?.label}
-                            <button onClick={() => removeCountry(value)}> ❌</button>
-                        </div>
-                    );
-                })}
-            </div>
+                    <Select
+                        options={countries}
+                        value={countries.find(c => c.value === selectedCountries[index])}
+                        onChange={(option) => handleChange(index, option)}
+                        components={{
+                            Option: customOption,
+                            SingleValue: customSingleValue
+                        }}
+                        placeholder="Choisir un pays"
+                        isSearchable
+                        classNamePrefix="react-select"
+                    />
+                </div>
+            ))}
         </div>
     );
 };
 
 export default CountrySelector;
+
