@@ -1,35 +1,41 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { useEffect, useState } from "react";
+import CountrySelector from "./components/CountrySelector";
+import { getCountriesList } from "./services/CovidAPI";
 
 function App() {
-  const [count, setCount] = useState(0)
+    const [countries, setCountries] = useState([]);
+    const [selectedCountries, setSelectedCountries] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    useEffect(() => {
+        async function loadCountries() {
+            try {
+                const data = await getCountriesList();
+                setCountries(data);
+            } catch (err) {
+                setError("Erreur lors du chargement des pays");
+            } finally {
+                setLoading(false);
+            }
+        }
+        loadCountries();
+    }, []);
+
+    if (loading) return <p>Chargement des pays...</p>;
+    if (error) return <p>{error}</p>;
+
+    return (
+        <div>
+            <h1>Comparateur COVID-19</h1>
+
+            <CountrySelector
+                countries={countries}
+                selectedCountries={selectedCountries}
+                setSelectedCountries={setSelectedCountries}
+            />
+        </div>
+    );
 }
 
-export default App
+export default App;
