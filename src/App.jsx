@@ -1,10 +1,29 @@
-import { useState } from 'react'
+import React, { useEffect, useState } from "react";
 import CountrySelector from "./components/CountrySelector";
-import { countries } from "./data/countries";
-import './App.css'
+import { getCountriesList } from "./services/CovidAPI";
 
 function App() {
+    const [countries, setCountries] = useState([]);
     const [selectedCountries, setSelectedCountries] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        async function loadCountries() {
+            try {
+                const data = await getCountriesList();
+                setCountries(data);
+            } catch (err) {
+                setError("Erreur lors du chargement des pays");
+            } finally {
+                setLoading(false);
+            }
+        }
+        loadCountries();
+    }, []);
+
+    if (loading) return <p>Chargement des pays...</p>;
+    if (error) return <p>{error}</p>;
 
     return (
         <div>
@@ -19,4 +38,4 @@ function App() {
     );
 }
 
-export default App
+export default App;

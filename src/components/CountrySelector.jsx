@@ -2,25 +2,25 @@ import React from "react";
 
 const CountrySelector = ({ countries, selectedCountries, setSelectedCountries }) => {
 
-    const handleSelect = (event) => {
-        const countryCode = event.target.value;
+    const handleSelect = (e) => {
+        const value = e.target.value;
 
         if (
-            countryCode &&
-            !selectedCountries.includes(countryCode) &&
+            value &&
+            !selectedCountries.includes(value) &&
             selectedCountries.length < 2
         ) {
-            setSelectedCountries([...selectedCountries, countryCode]);
+            setSelectedCountries([...selectedCountries, value]);
         }
     };
 
-    const removeCountry = (code) => {
-        setSelectedCountries(selectedCountries.filter(c => c !== code));
+    const removeCountry = (value) => {
+        setSelectedCountries(selectedCountries.filter(c => c !== value));
     };
 
-    // Filtrer la liste pour ne pas afficher les pays déjà sélectionnés
+    // Filtrer les pays déjà sélectionnés
     const availableCountries = countries.filter(
-        c => !selectedCountries.includes(c.code)
+        c => !selectedCountries.includes(c.value)
     );
 
     return (
@@ -30,20 +30,29 @@ const CountrySelector = ({ countries, selectedCountries, setSelectedCountries })
             <select onChange={handleSelect} value="">
                 <option value="">-- Choisir un pays --</option>
                 {availableCountries.map(country => (
-                    <option key={country.code} value={country.code}>
-                        {country.name}
+                    <option key={country.value} value={country.value}>
+                        {country.label}
                     </option>
                 ))}
             </select>
 
             <div style={{ marginTop: "10px" }}>
                 <h4>Pays sélectionnés :</h4>
-                {selectedCountries.map(code => {
-                    const country = countries.find(c => c.code === code);
+
+                {selectedCountries.map(value => {
+                    const country = countries.find(c => c.value === value);
                     return (
-                        <div key={code}>
-                            {country?.name}
-                            <button onClick={() => removeCountry(code)}>❌</button>
+                        <div key={value}>
+                            {country?.flag && (
+                                <img
+                                    src={country.flag}
+                                    alt={country.label}
+                                    width="20"
+                                    style={{ marginRight: "8px" }}
+                                />
+                            )}
+                            {country?.label}
+                            <button onClick={() => removeCountry(value)}> ❌</button>
                         </div>
                     );
                 })}
