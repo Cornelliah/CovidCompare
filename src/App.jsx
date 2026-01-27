@@ -13,16 +13,39 @@ import "./App.css";
 
 function App() {
     const [countries, setCountries] = useState([]);
-    const [selectedCountries, setSelectedCountries] = useState([null, null]);
+    const [selectedCountries, setSelectedCountries] = useState([null]);
 
     // Stats instantanées (Cartes + Bar chart)
-    const [stats, setStats] = useState([null, null]);
+    const [stats, setStats] = useState([null]);
 
     // Historique sur 30 jours (Line chart)
-    const [history, setHistory] = useState([null, null]); // <--- NOUVEL ÉTAT
+    const [history, setHistory] = useState([null]); // <--- NOUVEL ÉTAT
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+
+    const MAX_COUNTRIES = 6;
+
+    const addCountry = () => {
+        if (selectedCountries.length >= MAX_COUNTRIES) return;
+
+        setSelectedCountries(prev => [...prev, null]);
+        setStats(prev => [...prev, null]);
+        setHistory(prev => [...prev, null]);
+    };
+
+   
+    const removeCountry = (indexToRemove) => {
+        setSelectedCountries(prev =>
+            prev.filter((_, index) => index !== indexToRemove)
+        );
+        setStats(prev =>
+            prev.filter((_, index) => index !== indexToRemove)
+        );
+        setHistory(prev =>
+            prev.filter((_, index) => index !== indexToRemove)
+        );
+    };
 
     // Chargement liste pays
     useEffect(() => {
@@ -40,44 +63,39 @@ function App() {
     }, []);
 
     // Chargement des données (Snapshot + Historique) au changement de sélection
-    useEffect(() => {
-        async function fetchStats() {
-            const newStats = [...stats];
-            const newHistory = [...history]; // <--- COPIE
+   useEffect(() => {
+    async function fetchStats() {
+        const newStats = [...stats];
+        const newHistory = [...history];
 
-            // Fonction helper pour charger un pays
-            const loadCountryData = async (countryName, index) => {
-                if (countryName) {
-                    try {
-                        // 1. On lance les deux requêtes en parallèle pour gagner du temps
-                        const [snapshotData, historyData] = await Promise.all([
-                            getCountrySnapshot(countryName),
-                            getCountryHistorical(countryName, 30) // 30 jours d'historique
-                        ]);
-
-                        newStats[index] = snapshotData;
-                        newHistory[index] = historyData; // <--- STOCKAGE
-                    } catch (e) {
-                        console.error("Erreur fetch pays", e);
+        await Promise.all(
+            selectedCountries.map((country, index) =>
+                (async () => {
+                    if (country) {
+                        try {
+                            const [snapshotData, historyData] = await Promise.all([
+                                getCountrySnapshot(country),
+                                getCountryHistorical(country, 30),
+                            ]);
+                            newStats[index] = snapshotData;
+                            newHistory[index] = historyData;
+                        } catch (e) {
+                            console.error("Erreur fetch pays", e);
+                        }
+                    } else {
+                        newStats[index] = null;
+                        newHistory[index] = null;
                     }
-                } else {
-                    newStats[index] = null;
-                    newHistory[index] = null;
-                }
-            };
+                })()
+            )
+        );
 
-            // Chargement Pays 1
-            await loadCountryData(selectedCountries[0], 0);
+        setStats(newStats);
+        setHistory(newHistory);
+    }
 
-            // Chargement Pays 2
-            await loadCountryData(selectedCountries[1], 1);
-
-            setStats(newStats);
-            setHistory(newHistory); // <--- MISE À JOUR STATE
-        }
-
-        fetchStats();
-    }, [selectedCountries]);
+    fetchStats();
+}, [selectedCountries]);
 
     const getLastUpdateDate = () => {
         const d1 = stats[0]?.updated;
@@ -107,13 +125,30 @@ function App() {
                 countries={countries}
                 selectedCountries={selectedCountries}
                 setSelectedCountries={setSelectedCountries}
+                removeCountry={removeCountry}
+                canAddMore={selectedCountries.length < MAX_COUNTRIES}
             />
+
+            <button className="add-country-btn" onClick={addCountry}  disabled={selectedCountries.length >= MAX_COUNTRIES}>
+             + Ajouter un pays
+             
+            </button>
+
+             {selectedCountries.length >= MAX_COUNTRIES && (
+                    <p style={{ fontSize: "0.85em", opacity: 0.7 }}>
+                        Limité à {MAX_COUNTRIES} pays maximum
+                    </p>
+              )}
+
+
 
             <div className="stats-section" style={{ marginTop: "30px" }}>
                 <div style={{ display: "flex", gap: "20px", flexWrap: "wrap" }}>
-                    <CountryStats stats={stats[0]} />
-                    <CountryStats stats={stats[1]} />
+                     {stats.map((stat, index) => (
+                         <CountryStats key={index} stats={stat} />
+                      ))}
                 </div>
+
             </div>
 
             {/* Zone des graphiques */}
