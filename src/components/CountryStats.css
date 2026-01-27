@@ -1,0 +1,112 @@
+.stats-container {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+}
+
+.country-card {
+    background: white;
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    flex: 1;
+    min-width: 300px;
+    border: 1px solid #eef2f6;
+    transition: transform 0.2s;
+}
+
+.country-card:hover {
+    transform: translateY(-5px);
+}
+
+/* En-tête de la carte (Drapeau + Nom) */
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #f3f4f6;
+    padding-bottom: 15px;
+}
+
+.card-header img {
+    width: 40px;
+    height: 30px;
+    border-radius: 4px;
+    object-fit: cover;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.card-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: #1f2937;
+}
+
+/* Grille des chiffres */
+.stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.stat-item {
+    background: #f9fafb;
+    padding: 12px;
+    border-radius: 12px;
+    text-align: center;
+}
+
+.stat-item h4 {
+    margin: 0 0 5px;
+    font-size: 0.85rem;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stat-item p {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #111827;
+}
+
+.stat-item .new-cases {
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-top: 4px;
+}
+
+/* Couleurs spécifiques pour les indicateurs */
+.text-blue {
+    color: #2563eb !important;
+}
+
+.text-red {
+    color: #dc2626 !important;
+}
+
+.text-green {
+    color: #16a34a !important;
+}
+
+.text-orange {
+    color: #d97706 !important;
+}
+
+/* Placeholder quand aucun pays n'est sélectionné */
+.empty-card {
+    flex: 1;
+    min-width: 300px;
+    height: 200px;
+    border-radius: 20px;
+    border: 2px dashed #cbd5e1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+    background: #f8fafc;
+}
