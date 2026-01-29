@@ -1,69 +1,76 @@
 import React from "react";
 import {
-    Chart as ChartJS,
-    CategoryScale,
-    LinearScale,
-    BarElement,
-    Title,
-    Tooltip,
-    Legend,
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
 } from "chart.js";
 import { Bar } from "react-chartjs-2";
 
-// Enregistrement des composants Chart.js obligatoires
-ChartJS.register(
-    CategoryScale,
-    LinearScale,
-    BarElement,
-    Title,
-    Tooltip,
-    Legend,
-);
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
-const ComparisonChart = ({ data1, data2 }) => {
-    // Si aucune donnée n'est prête, on n'affiche rien ou un placeholder
-    if (!data1 && !data2) {
-        return (
-            <p style={{ textAlign: "center" }}>
-                Sélectionnez des pays pour voir le comparatif.
-            </p>
-        );
-    }
+// Palette simple (tu peux en ajouter)
+const COLORS = [
+  "rgba(59, 130, 246, 0.7)",   // bleu
+  "rgba(124, 58, 237, 0.7)",   // violet
+  "rgba(16, 185, 129, 0.7)",   // vert
+  "rgba(249, 115, 22, 0.7)",   // orange
+  "rgba(239, 68, 68, 0.7)",    // rouge
+  "rgba(14, 165, 233, 0.7)",   // cyan
+  "rgba(168, 85, 247, 0.7)",   // purple
+  "rgba(234, 179, 8, 0.7)",    // jaune
+];
 
-    // Préparation des données pour Chart.js
-    const chartData = {
-        labels: ["Cas Totaux", "Cas Actifs", "Décès", "Guérisons"],
-        datasets: [
-            {
-                label: data1 ? data1.country : "Pays 1",
-                data: data1
-                    ? [data1.cases, data1.active, data1.deaths, data1.recovered]
-                    : [],
-                backgroundColor: "rgba(59, 130, 246, 0.7)", // Bleu
-            },
-            {
-                label: data2 ? data2.country : "Pays 2",
-                data: data2
-                    ? [data2.cases, data2.active, data2.deaths, data2.recovered]
-                    : [],
-                backgroundColor: "rgba(124, 58, 237, 0.7)", // Violet
-            },
-        ],
-    };
+const safeNumber = (v) => (typeof v === "number" && Number.isFinite(v) ? v : 0);
 
-    const options = {
-        responsive: true,
-        plugins: {
-            legend: { position: "top" },
-            title: { display: true, text: "Comparaison Directe" },
-        },
-    };
+const ComparisonChart = ({ countriesData = [] }) => {
+  const validCountries = (countriesData || []).filter(Boolean);
 
+  if (validCountries.length === 0) {
     return (
-        <div style={{ maxWidth: "800px", margin: "0 auto", padding: "20px" }}>
-            <Bar options={options} data={chartData} />
-        </div>
+      <p style={{ textAlign: "center" }}>
+        Sélectionnez des pays pour voir le comparatif.
+      </p>
     );
+  }
+
+  const labels = ["Cas Totaux", "Cas Actifs", "Décès", "Guérisons"];
+
+  const chartData = {
+    labels,
+    datasets: validCountries.map((c, idx) => ({
+      label: c?.country ?? `Pays ${idx + 1}`,
+      data: [
+        safeNumber(c?.cases),
+        safeNumber(c?.active),
+        safeNumber(c?.deaths),
+        safeNumber(c?.recovered),
+      ],
+      backgroundColor: COLORS[idx % COLORS.length],
+    })),
+  };
+
+  const options = {
+    responsive: true,
+    plugins: {
+      legend: { position: "top" },
+      title: { display: true, text: "Comparaison Directe" },
+      tooltip: {
+        callbacks: {
+          label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y?.toLocaleString?.() ?? ctx.parsed.y}`,
+        },
+      },
+    },
+  };
+
+  return (
+    <div style={{ maxWidth: "900px", margin: "0 auto", padding: "20px" }}>
+      <Bar options={options} data={chartData} />
+    </div>
+  );
 };
 
 export default ComparisonChart;
