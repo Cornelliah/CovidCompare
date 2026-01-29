@@ -98,11 +98,14 @@ function App() {
 }, [selectedCountries]);
 
     const getLastUpdateDate = () => {
-        const d1 = stats[0]?.updated;
-        const d2 = stats[1]?.updated;
-        if (!d1 && !d2) return null;
-        return Math.max(d1 || 0, d2 || 0);
-    };
+  const updates = stats
+    .map((s) => s?.updated)
+    .filter((u) => typeof u === "number" && Number.isFinite(u));
+
+  if (updates.length === 0) return null;
+  return Math.max(...updates);
+};
+
 
     const lastUpdate = getLastUpdateDate();
 
@@ -152,13 +155,14 @@ function App() {
             </div>
 
             {/* Zone des graphiques */}
-            <div style={{ marginTop: "40px" }}>
-                {/* Graphique 1 : Comparaison globale (Barres) */}
-                <ComparisonChart data1={stats[0]} data2={stats[1]} />
+<div style={{ marginTop: "40px" }}>
+  {/* Graphique 1 : Comparaison globale (Barres) */}
+  <ComparisonChart countriesData={stats.filter(Boolean)} />
 
-                {/* Graphique 2 : Historique (Lignes) - NOUVEAU */}
-                <HistoryChart history1={history[0]} history2={history[1]} />
-            </div>
+  {/* Graphique 2 : Historique (Lignes) */}
+  <HistoryChart countriesHistory={history.filter(Boolean)} />
+</div>
+
         </div>
     );
 }
