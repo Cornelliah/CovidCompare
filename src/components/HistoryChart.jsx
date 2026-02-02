@@ -1,13 +1,13 @@
 import React from "react";
 import {
-    Chart as ChartJS,
-    CategoryScale,
-    LinearScale,
-    PointElement,
-    LineElement,
-    Title,
-    Tooltip,
-    Legend,
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
 } from "chart.js";
 import { Line } from "react-chartjs-2";
 
@@ -48,11 +48,20 @@ const HistoryChart = ({ historyList }) => {
 
     const data = { labels: dates, datasets: datasets };
 
-    return (
-        <div style={{ maxWidth: "800px", margin: "40px auto", padding: "20px", background: "white", borderRadius: "20px", boxShadow: "0 10px 25px rgba(0,0,0,0.05)" }}>
-            <Line options={options} data={data} />
-        </div>
-    );
+  return (
+    <div
+      style={{
+        maxWidth: "900px",
+        margin: "40px auto",
+        padding: "20px",
+        background: "white",
+        borderRadius: "20px",
+        boxShadow: "0 10px 25px rgba(0,0,0,0.05)",
+      }}
+    >
+      <Line options={options} data={data} />
+    </div>
+  );
 };
 
 export default HistoryChart;

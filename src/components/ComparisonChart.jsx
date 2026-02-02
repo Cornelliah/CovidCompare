@@ -1,12 +1,12 @@
 import React from "react";
 import {
-    Chart as ChartJS,
-    CategoryScale,
-    LinearScale,
-    BarElement,
-    Title,
-    Tooltip,
-    Legend,
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
 } from "chart.js";
 import { Bar } from "react-chartjs-2";
 
@@ -50,11 +50,48 @@ const ComparisonChart = ({ data }) => {
         },
     };
 
+  if (validCountries.length === 0) {
     return (
-        <div style={{ maxWidth: "800px", margin: "0 auto", padding: "20px" }}>
-            <Bar options={options} data={chartData} />
-        </div>
+      <p style={{ textAlign: "center" }}>
+        Sélectionnez des pays pour voir le comparatif.
+      </p>
     );
+  }
+
+  const labels = ["Cas Totaux", "Cas Actifs", "Décès", "Guérisons"];
+
+  const chartData = {
+    labels,
+    datasets: validCountries.map((c, idx) => ({
+      label: c?.country ?? `Pays ${idx + 1}`,
+      data: [
+        safeNumber(c?.cases),
+        safeNumber(c?.active),
+        safeNumber(c?.deaths),
+        safeNumber(c?.recovered),
+      ],
+      backgroundColor: COLORS[idx % COLORS.length],
+    })),
+  };
+
+  const options = {
+    responsive: true,
+    plugins: {
+      legend: { position: "top" },
+      title: { display: true, text: "Comparaison Directe" },
+      tooltip: {
+        callbacks: {
+          label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y?.toLocaleString?.() ?? ctx.parsed.y}`,
+        },
+      },
+    },
+  };
+
+  return (
+    <div style={{ maxWidth: "900px", margin: "0 auto", padding: "20px" }}>
+      <Bar options={options} data={chartData} />
+    </div>
+  );
 };
 
 export default ComparisonChart;
