@@ -54,6 +54,13 @@ Pour lancer le projet localement sur votre machine :
 
 ---
 
+5.  ## Nom et prenom des membres :
+
+    * **Tchinda loic**
+    * **Horiane Hounkanrin**
+    * **Yvan Seukou**
+    * **ANANI KOFFI JEAN-YVES**
+
 ## 📂 Structure du Projet
 
 ```text

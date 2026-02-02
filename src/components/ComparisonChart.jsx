@@ -12,22 +12,43 @@ import { Bar } from "react-chartjs-2";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
-// Palette simple (tu peux en ajouter)
 const COLORS = [
-  "rgba(59, 130, 246, 0.7)",   // bleu
-  "rgba(124, 58, 237, 0.7)",   // violet
-  "rgba(16, 185, 129, 0.7)",   // vert
-  "rgba(249, 115, 22, 0.7)",   // orange
-  "rgba(239, 68, 68, 0.7)",    // rouge
-  "rgba(14, 165, 233, 0.7)",   // cyan
-  "rgba(168, 85, 247, 0.7)",   // purple
-  "rgba(234, 179, 8, 0.7)",    // jaune
+    'rgba(59, 130, 246, 0.8)', 'rgba(124, 58, 237, 0.8)',
+    'rgba(16, 185, 129, 0.8)', 'rgba(245, 158, 11, 0.8)',
+    'rgba(239, 68, 68, 0.8)'
 ];
 
-const safeNumber = (v) => (typeof v === "number" && Number.isFinite(v) ? v : 0);
+const ComparisonChart = ({ data }) => {
+    // data est maintenant un tableau : [statsPays1, statsPays2, statsPays3...]
 
-const ComparisonChart = ({ countriesData = [] }) => {
-  const validCountries = (countriesData || []).filter(Boolean);
+    // On filtre pour ne garder que les pays qui ont des données chargées
+    const validData = data.filter(item => item !== null);
+
+    if (validData.length === 0) {
+        return <p style={{ textAlign: "center" }}>Sélectionnez des pays pour voir le comparatif.</p>;
+    }
+
+    const chartData = {
+        labels: ["Cas Totaux", "Cas Actifs", "Décès", "Guérisons"],
+        datasets: validData.map((countryStats, index) => ({
+            label: countryStats.country,
+            data: [
+                countryStats.cases,
+                countryStats.active,
+                countryStats.deaths,
+                countryStats.recovered
+            ],
+            backgroundColor: COLORS[index % COLORS.length], // On cycle sur les couleurs
+        })),
+    };
+
+    const options = {
+        responsive: true,
+        plugins: {
+            legend: { position: "top" },
+            title: { display: true, text: "Comparaison Multi-pays" },
+        },
+    };
 
   if (validCountries.length === 0) {
     return (

@@ -11,94 +11,42 @@ import {
 } from "chart.js";
 import { Line } from "react-chartjs-2";
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend
-);
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
-const LINE_COLORS = [
-  "rgb(37, 99, 235)",   // bleu
-  "rgb(124, 58, 237)",  // violet
-  "rgb(16, 185, 129)",  // vert
-  "rgb(249, 115, 22)",  // orange
-  "rgb(239, 68, 68)",   // rouge
-  "rgb(14, 165, 233)",  // cyan
-  "rgb(168, 85, 247)",  // purple
-  "rgb(234, 179, 8)",   // jaune
+const COLORS = [
+    'rgba(59, 130, 246, 1)', 'rgba(124, 58, 237, 1)',
+    'rgba(16, 185, 129, 1)', 'rgba(245, 158, 11, 1)',
+    'rgba(239, 68, 68, 1)'
 ];
 
-const safeNumberOrNull = (v) =>
-  typeof v === "number" && Number.isFinite(v) ? v : null;
+const HistoryChart = ({ historyList }) => {
+    // historyList est un tableau [hist1, hist2...]
+    const validHistory = historyList.filter(h => h !== null);
 
-const HistoryChart = ({ countriesHistory = [] }) => {
-  const valid = (countriesHistory || []).filter(Boolean);
+    if (validHistory.length === 0) return null;
 
-  if (valid.length === 0) return null;
+    // On prend les dates du premier pays valide pour l'axe X
+    const rawDataFirst = validHistory[0]?.timeline?.cases || {};
+    const dates = Object.keys(rawDataFirst);
 
-  // Union de toutes les dates
-  const dateSet = new Set();
-  valid.forEach((h) => {
-    const casesObj = h?.timeline?.cases || {};
-    Object.keys(casesObj).forEach((d) => dateSet.add(d));
-  });
+    const datasets = validHistory.map((h, index) => ({
+        label: h.country,
+        data: Object.values(h.timeline.cases || {}),
+        borderColor: COLORS[index % COLORS.length],
+        backgroundColor: COLORS[index % COLORS.length],
+        tension: 0.3,
+    }));
 
-  const dates = Array.from(dateSet);
-
-  // (Optionnel) Tri simple : comme l'API renvoie souvent "M/D/YY", un tri string peut être imparfait.
-  // Si besoin, tu pourras remplacer par un tri via parsing Date.
-  dates.sort((a, b) => a.localeCompare(b));
-
-  const datasets = valid.map((h, idx) => {
-    const casesObj = h?.timeline?.cases || {};
-    return {
-      label: h?.country ?? `Pays ${idx + 1}`,
-      data: dates.map((d) => safeNumberOrNull(casesObj[d])),
-      borderColor: LINE_COLORS[idx % LINE_COLORS.length],
-      backgroundColor: "rgba(0,0,0,0)", // pas de fill
-      tension: 0.3,
-      pointRadius: 0, // + lisible si beaucoup de points
-      spanGaps: true, // relie malgré les null si tu veux (true = courbe continue)
+    const options = {
+        responsive: true,
+        plugins: {
+            legend: { position: "top" },
+            title: { display: true, text: "Évolution des cas (30 jours)" },
+        },
+        interaction: { mode: 'index', intersect: false },
     };
-  });
 
-  const options = {
-    responsive: true,
-    plugins: {
-      legend: { position: "top" },
-      title: {
-        display: true,
-        text: "Évolution des cas confirmés (30 derniers jours)",
-      },
-      tooltip: {
-        mode: "index",
-        intersect: false,
-        callbacks: {
-          label: (ctx) =>
-            `${ctx.dataset.label}: ${
-              typeof ctx.parsed.y === "number"
-                ? ctx.parsed.y.toLocaleString()
-                : "N/A"
-            }`,
-        },
-      },
-    },
-    interaction: { mode: "index", intersect: false },
-    scales: {
-      y: {
-        ticks: {
-          callback: (v) =>
-            typeof v === "number" ? v.toLocaleString() : v,
-        },
-      },
-    },
-  };
-
-  const data = { labels: dates, datasets };
+    const data = { labels: dates, datasets: datasets };
 
   return (
     <div
