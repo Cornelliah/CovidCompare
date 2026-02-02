@@ -8,7 +8,7 @@ L'objectif de ce projet est de manipuler des données complexes provenant d'une 
 
 ## 🚀 Fonctionnalités
 
-* **Sélection dynamique :** Choix de deux pays via un menu déroulant avec recherche et affichage des drapeaux.
+* **Sélection dynamique :** Choix de plusieux pays via un menu déroulant avec recherche et affichage des drapeaux.
 * **Statistiques en temps réel :** Affichage des cas totaux, décès, guérisons et cas actifs.
 * **Comparaison visuelle :**
     * 📊 **Graphique en barres :** Pour comparer les volumes globaux (Cas vs Décès vs Guérisons).
