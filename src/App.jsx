@@ -2,8 +2,13 @@ import React, { useEffect, useState } from "react";
 import CountrySelector from "./components/CountrySelector";
 import ComparisonChart from "./components/ComparisonChart";
 import CountryStats from "./components/CountryStats";
-import HistoryChart from "./components/HistoryChart";
-import { getCountriesList, getCountrySnapshot, getCountryHistorical, formatUpdatedDate } from "./services/CovidAPI";
+import HistoryChart from "./components/HistoryChart"; // <--- NOUVEAU IMPORT
+import {
+    getCountriesList,
+    getCountrySnapshot,
+    getCountryHistorical, // <--- NOUVEAU IMPORT
+    formatUpdatedDate
+} from "./services/CovidAPI";
 import "./App.css";
 
 function App() {
@@ -17,6 +22,7 @@ function App() {
     const [history, setHistory] = useState([null]); // <--- NOUVEL ÉTAT
 
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     const MAX_COUNTRIES = 6;
 
@@ -44,114 +50,119 @@ function App() {
     // Chargement liste pays
     useEffect(() => {
         async function loadCountries() {
-            const data = await getCountriesList();
-            setCountries(data);
-            setLoading(false);
+            try {
+                const data = await getCountriesList();
+                setCountries(data);
+            } catch (err) {
+                setError("Erreur lors du chargement des pays");
+            } finally {
+                setLoading(false);
+            }
         }
         loadCountries();
     }, []);
 
-    // --- GESTION DES LISTES ---
+    // Chargement des données (Snapshot + Historique) au changement de sélection
+   useEffect(() => {
+    async function fetchStats() {
+        const newStats = [...stats];
+        const newHistory = [...history];
 
-    const addCountry = () => {
-        if (selectedCountries.length < 5) { // Limite à 5 pays max
-            setSelectedCountries([...selectedCountries, null]);
-            // On agrandit aussi les tableaux de résultats pour éviter les décalages
-            setStats([...stats, null]);
-            setHistory([...history, null]);
-        }
-    };
+        await Promise.all(
+            selectedCountries.map((country, index) =>
+                (async () => {
+                    if (country) {
+                        try {
+                            const [snapshotData, historyData] = await Promise.all([
+                                getCountrySnapshot(country),
+                                getCountryHistorical(country, 30),
+                            ]);
+                            newStats[index] = snapshotData;
+                            newHistory[index] = historyData;
+                        } catch (e) {
+                            console.error("Erreur fetch pays", e);
+                        }
+                    } else {
+                        newStats[index] = null;
+                        newHistory[index] = null;
+                    }
+                })()
+            )
+        );
 
-    const removeCountry = (index) => {
-        const newSelected = selectedCountries.filter((_, i) => i !== index);
-        const newStats = stats.filter((_, i) => i !== index);
-        const newHistory = history.filter((_, i) => i !== index);
-
-        setSelectedCountries(newSelected);
         setStats(newStats);
         setHistory(newHistory);
-    };
+    }
 
-    const handleCountryChange = (index, selectedOption) => {
-        const newSelected = [...selectedCountries];
-        newSelected[index] = selectedOption?.value || null;
-        setSelectedCountries(newSelected);
-    };
+    fetchStats();
+}, [selectedCountries]);
 
-    // --- LOGIQUE API ---
-    // Se déclenche quand selectedCountries change
-    useEffect(() => {
-        async function fetchAllStats() {
-            // On prépare les promesses pour tous les pays sélectionnés
-            const promises = selectedCountries.map(async (country) => {
-                if (!country) return { stat: null, hist: null };
-                try {
-                    const [stat, hist] = await Promise.all([
-                        getCountrySnapshot(country),
-                        getCountryHistorical(country, 30)
-                    ]);
-                    return { stat, hist };
-                } catch (error) {
-                    console.error("Erreur fetch", country);
-                    return { stat: null, hist: null };
-                }
-            });
+    const getLastUpdateDate = () => {
+  const updates = stats
+    .map((s) => s?.updated)
+    .filter((u) => typeof u === "number" && Number.isFinite(u));
 
-            const results = await Promise.all(promises);
-
-            // On sépare les résultats dans les deux states
-            setStats(results.map(r => r.stat));
-            setHistory(results.map(r => r.hist));
-        }
-
-        fetchAllStats();
-    }, [selectedCountries]);
-
-    // Récupérer la date la plus récente parmi tous les stats
-    const lastUpdate = stats.reduce((latest, current) => {
-        if (!current?.updated) return latest;
-        return Math.max(latest, current.updated);
-    }, 0);
+  if (updates.length === 0) return null;
+  return Math.max(...updates);
+};
 
 
-    if (loading) return <p>Chargement...</p>;
+    const lastUpdate = getLastUpdateDate();
+
+    if (loading) return <p>Chargement des pays...</p>;
+    if (error) return <p>{error}</p>;
 
     return (
         <div className="app-container">
             <div className="header-card">
                 <h1>Comparateur COVID-19</h1>
-                <p>Comparez les statistiques entre plusieurs pays</p>
-                {lastUpdate > 0 && (
+                <p>Comparez les statistiques COVID-19 entre pays en temps réel</p>
+                {lastUpdate && (
                     <p style={{ fontSize: '0.9em', marginTop: '10px', opacity: 0.8 }}>
-                        Maj : {formatUpdatedDate(lastUpdate)}
+                        Dernière mise à jour : {formatUpdatedDate(lastUpdate)}
                     </p>
                 )}
             </div>
 
-            {/* Sélecteur mis à jour avec les nouvelles props */}
             <CountrySelector
                 countries={countries}
                 selectedCountries={selectedCountries}
-                handleChange={handleCountryChange} // Nouvelle prop
-                addCountry={addCountry}           // Nouvelle prop
-                removeCountry={removeCountry}     // Nouvelle prop
+                setSelectedCountries={setSelectedCountries}
+                removeCountry={removeCountry}
+                canAddMore={selectedCountries.length < MAX_COUNTRIES}
             />
 
-            {/* Zone des cartes (Mapping dynamique) */}
+            <button className="add-country-btn" onClick={addCountry}  disabled={selectedCountries.length >= MAX_COUNTRIES}>
+             + Ajouter un pays
+             
+            </button>
+
+             {selectedCountries.length >= MAX_COUNTRIES && (
+                    <p style={{ fontSize: "0.85em", opacity: 0.7 }}>
+                        Limité à {MAX_COUNTRIES} pays maximum
+                    </p>
+              )}
+
+
+
             <div className="stats-section" style={{ marginTop: "30px" }}>
-                <div style={{ display: "flex", gap: "20px", flexWrap: "wrap", justifyContent: 'center' }}>
-                    {stats.map((stat, index) => (
-                        <CountryStats key={index} stats={stat} />
-                    ))}
+                <div style={{ display: "flex", gap: "20px", flexWrap: "wrap" }}>
+                     {stats.map((stat, index) => (
+                         <CountryStats key={index} stats={stat} />
+                      ))}
                 </div>
 
             </div>
 
-            {/* Graphiques mis à jour pour recevoir des tableaux */}
-            <div style={{ marginTop: "40px" }}>
-                <ComparisonChart data={stats} />
-                <HistoryChart historyList={history} />
-            </div>
+            {/* Zone des graphiques */}
+<div style={{ marginTop: "40px" }}>
+  {/* Graphique 1 : Comparaison globale (Barres) */}
+  <ComparisonChart countriesData={stats.filter(Boolean)} />
+
+  {/* Graphique 2 : Historique (Lignes) */}
+  <HistoryChart countriesHistory={history.filter(Boolean)} />
+</div>
+
         </div>
     );
 }
