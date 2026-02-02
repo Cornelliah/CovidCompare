@@ -2,7 +2,7 @@
 // Service API pour disease.sh
 // Base doc : https://disease.sh/docs
 
-const BASE_URL = import.meta.env.VITE_API_URL;
+const BASE_URL = "https://disease.sh/v3/covid-19";
 
 /**
  * Fetch JSON avec gestion d'erreur claire

@@ -8,40 +8,15 @@ import "./App.css";
 
 function App() {
     const [countries, setCountries] = useState([]);
+
+    // On commence avec 1 seul pays vide au lieu de 2
     const [selectedCountries, setSelectedCountries] = useState([null]);
-
-    // Stats instantanées (Cartes + Bar chart)
     const [stats, setStats] = useState([null]);
-
-    // Historique sur 30 jours (Line chart)
-    const [history, setHistory] = useState([null]); // <--- NOUVEL ÉTAT
+    const [history, setHistory] = useState([null]);
 
     const [loading, setLoading] = useState(true);
 
-    const MAX_COUNTRIES = 6;
-
-    const addCountry = () => {
-        if (selectedCountries.length >= MAX_COUNTRIES) return;
-
-        setSelectedCountries(prev => [...prev, null]);
-        setStats(prev => [...prev, null]);
-        setHistory(prev => [...prev, null]);
-    };
-
-   
-    const removeCountry = (indexToRemove) => {
-        setSelectedCountries(prev =>
-            prev.filter((_, index) => index !== indexToRemove)
-        );
-        setStats(prev =>
-            prev.filter((_, index) => index !== indexToRemove)
-        );
-        setHistory(prev =>
-            prev.filter((_, index) => index !== indexToRemove)
-        );
-    };
-
-    // Chargement liste pays
+    // Chargement initial liste pays
     useEffect(() => {
         async function loadCountries() {
             const data = await getCountriesList();
@@ -144,7 +119,6 @@ function App() {
                         <CountryStats key={index} stats={stat} />
                     ))}
                 </div>
-
             </div>
 
             {/* Graphiques mis à jour pour recevoir des tableaux */}

@@ -34,16 +34,6 @@
     margin: 0;
 }
 
-.add-country-btn{
-    background-color: rgb(228, 227, 227);
-     color: #676868 ;
-}
-
-.add-country-btn:hover{
-    background-color: rgb(95, 94, 94);
-     color: #eff1f1 ;
-}
-
 
 @media (max-width: 768px) {
     .header-card {
