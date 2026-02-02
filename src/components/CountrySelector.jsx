@@ -2,18 +2,7 @@ import React from "react";
 import Select from "react-select";
 import "./CountrySelector.css";
 
-const CountrySelector = ({
-    countries,
-    selectedCountries,
-    setSelectedCountries,
-    removeCountry
-}) => {
-
-    const handleChange = (index, selectedOption) => {
-        const newSelected = [...selectedCountries];
-        newSelected[index] = selectedOption?.value || null;
-        setSelectedCountries(newSelected);
-    };
+const CountrySelector = ({ countries, selectedCountries, handleChange, addCountry, removeCountry }) => {
 
     const customOption = ({ innerProps, data }) => (
         <div {...innerProps} className="option">
@@ -30,42 +19,44 @@ const CountrySelector = ({
     );
 
     return (
-        <div className="country-selector-container">
-            {selectedCountries.map((_, index) => (
-                <div key={index} className="country-block">
-                    
-                    <div className="country-header">
-                        <label className="country-label">
-                            Pays {index + 1}
-                        </label>
+        <div className="selector-wrapper">
+            <div className="country-selector-container">
+                {selectedCountries.map((countryCode, index) => (
+                    <div key={index} className="country-block">
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
+                            <label className="country-label">Pays {index + 1}</label>
+                            {/* Bouton supprimer (sauf s'il n'y en a qu'un seul) */}
+                            {selectedCountries.length > 1 && (
+                                <button
+                                    onClick={() => removeCountry(index)}
+                                    style={{ padding: '2px 8px', fontSize: '12px', background: '#fee2e2', color: '#dc2626', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                                >
+                                    ✕
+                                </button>
+                            )}
+                        </div>
 
-                        {selectedCountries.length > 1 && (
-                            <button
-                                className="remove-btn"
-                                onClick={() => removeCountry(index)}
-                                title="Supprimer ce pays"
-                            >
-                                ❌
-                            </button>
-                        )}
+                        <Select
+                            options={countries}
+                            value={countries.find(c => c.value === countryCode)}
+                            onChange={(option) => handleChange(index, option)}
+                            components={{ Option: customOption, SingleValue: customSingleValue }}
+                            placeholder="Choisir..."
+                            classNamePrefix="react-select"
+                        />
                     </div>
+                ))}
+            </div>
 
-                    <Select
-                        options={countries}
-                        value={countries.find(
-                            c => c.value === selectedCountries[index]
-                        )}
-                        onChange={(option) => handleChange(index, option)}
-                        components={{
-                            Option: customOption,
-                            SingleValue: customSingleValue
-                        }}
-                        placeholder="Choisir un pays"
-                        isSearchable
-                        classNamePrefix="react-select"
-                    />
-                </div>
-            ))}
+            {/* Bouton Ajouter */}
+            {selectedCountries.length < 5 && (
+                <button
+                    onClick={addCountry}
+                    style={{ marginTop: '20px', background: '#3b82f6', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}
+                >
+                    + Ajouter un pays
+                </button>
+            )}
         </div>
     );
 };
