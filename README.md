@@ -54,6 +54,13 @@ Pour lancer le projet localement sur votre machine :
 
 ---
 
+5.  ## Nom et prenom des membres :
+
+    Tchinda loic
+    Horiane Hounkanrin
+    Yvan Seukou
+    ANANI KOFFI JEAN-YVES
+
 ## 📂 Structure du Projet
 
 ```text
@@ -67,10 +74,3 @@ src/
 │   └── CovidAPI.js          # Gestion des appels API (fetch, endpoints)
 ├── App.jsx                  # Logique principale et assemblage
 └── main.jsx                 # Point d'entrée React
-
-5.  ## Nom et prenom des membres :
-
-    Tchinda loic
-    Horiane Hounkanrin
-    Yvan Seukou
-    ANANI KOFFI JEAN-YVES
