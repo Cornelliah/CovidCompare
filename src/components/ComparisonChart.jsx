@@ -10,52 +10,43 @@ import {
 } from "chart.js";
 import { Bar } from "react-chartjs-2";
 
-// Enregistrement des composants Chart.js obligatoires
-ChartJS.register(
-    CategoryScale,
-    LinearScale,
-    BarElement,
-    Title,
-    Tooltip,
-    Legend,
-);
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
-const ComparisonChart = ({ data1, data2 }) => {
-    // Si aucune donnée n'est prête, on n'affiche rien ou un placeholder
-    if (!data1 && !data2) {
-        return (
-            <p style={{ textAlign: "center" }}>
-                Sélectionnez des pays pour voir le comparatif.
-            </p>
-        );
+const COLORS = [
+    'rgba(59, 130, 246, 0.8)', 'rgba(124, 58, 237, 0.8)',
+    'rgba(16, 185, 129, 0.8)', 'rgba(245, 158, 11, 0.8)',
+    'rgba(239, 68, 68, 0.8)'
+];
+
+const ComparisonChart = ({ data }) => {
+    // data est maintenant un tableau : [statsPays1, statsPays2, statsPays3...]
+
+    // On filtre pour ne garder que les pays qui ont des données chargées
+    const validData = data.filter(item => item !== null);
+
+    if (validData.length === 0) {
+        return <p style={{ textAlign: "center" }}>Sélectionnez des pays pour voir le comparatif.</p>;
     }
 
-    // Préparation des données pour Chart.js
     const chartData = {
         labels: ["Cas Totaux", "Cas Actifs", "Décès", "Guérisons"],
-        datasets: [
-            {
-                label: data1 ? data1.country : "Pays 1",
-                data: data1
-                    ? [data1.cases, data1.active, data1.deaths, data1.recovered]
-                    : [],
-                backgroundColor: "rgba(59, 130, 246, 0.7)", // Bleu
-            },
-            {
-                label: data2 ? data2.country : "Pays 2",
-                data: data2
-                    ? [data2.cases, data2.active, data2.deaths, data2.recovered]
-                    : [],
-                backgroundColor: "rgba(124, 58, 237, 0.7)", // Violet
-            },
-        ],
+        datasets: validData.map((countryStats, index) => ({
+            label: countryStats.country,
+            data: [
+                countryStats.cases,
+                countryStats.active,
+                countryStats.deaths,
+                countryStats.recovered
+            ],
+            backgroundColor: COLORS[index % COLORS.length], // On cycle sur les couleurs
+        })),
     };
 
     const options = {
         responsive: true,
         plugins: {
             legend: { position: "top" },
-            title: { display: true, text: "Comparaison Directe" },
+            title: { display: true, text: "Comparaison Multi-pays" },
         },
     };
 

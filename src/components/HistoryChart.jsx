@@ -11,67 +11,42 @@ import {
 } from "chart.js";
 import { Line } from "react-chartjs-2";
 
-// On enregistre les éléments nécessaires pour les lignes
-ChartJS.register(
-    CategoryScale,
-    LinearScale,
-    PointElement,
-    LineElement,
-    Title,
-    Tooltip,
-    Legend
-);
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
-const HistoryChart = ({ history1, history2 }) => {
-    if (!history1 && !history2) return null;
+const COLORS = [
+    'rgba(59, 130, 246, 1)', 'rgba(124, 58, 237, 1)',
+    'rgba(16, 185, 129, 1)', 'rgba(245, 158, 11, 1)',
+    'rgba(239, 68, 68, 1)'
+];
 
-    // On récupère les dates depuis le premier pays disponible pour l'axe X
-    // L'API renvoie un objet { "date": valeur }, on prend les clés
-    const rawData1 = history1?.timeline?.cases || {};
-    const dates = Object.keys(rawData1);
+const HistoryChart = ({ historyList }) => {
+    // historyList est un tableau [hist1, hist2...]
+    const validHistory = historyList.filter(h => h !== null);
 
-    // Préparation des datasets
-    const datasets = [];
+    if (validHistory.length === 0) return null;
 
-    if (history1) {
-        datasets.push({
-            label: history1.country,
-            data: Object.values(history1.timeline.cases),
-            borderColor: "rgb(37, 99, 235)", // Bleu
-            backgroundColor: "rgba(37, 99, 235, 0.5)",
-            tension: 0.3, // Pour courber légèrement la ligne
-        });
-    }
+    // On prend les dates du premier pays valide pour l'axe X
+    const rawDataFirst = validHistory[0]?.timeline?.cases || {};
+    const dates = Object.keys(rawDataFirst);
 
-    if (history2) {
-        datasets.push({
-            label: history2.country,
-            data: Object.values(history2.timeline.cases || {}),
-            borderColor: "rgb(124, 58, 237)", // Violet
-            backgroundColor: "rgba(124, 58, 237, 0.5)",
-            tension: 0.3,
-        });
-    }
+    const datasets = validHistory.map((h, index) => ({
+        label: h.country,
+        data: Object.values(h.timeline.cases || {}),
+        borderColor: COLORS[index % COLORS.length],
+        backgroundColor: COLORS[index % COLORS.length],
+        tension: 0.3,
+    }));
 
     const options = {
         responsive: true,
         plugins: {
             legend: { position: "top" },
-            title: {
-                display: true,
-                text: "Évolution des cas confirmés (30 derniers jours)",
-            },
+            title: { display: true, text: "Évolution des cas (30 jours)" },
         },
-        interaction: {
-            mode: 'index',
-            intersect: false,
-        },
+        interaction: { mode: 'index', intersect: false },
     };
 
-    const data = {
-        labels: dates, // Les dates en bas (ex: 10/22/24)
-        datasets: datasets,
-    };
+    const data = { labels: dates, datasets: datasets };
 
     return (
         <div style={{ maxWidth: "800px", margin: "40px auto", padding: "20px", background: "white", borderRadius: "20px", boxShadow: "0 10px 25px rgba(0,0,0,0.05)" }}>
